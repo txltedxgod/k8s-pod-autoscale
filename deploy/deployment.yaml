@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-pod-autoscale
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: k8s-pod-autoscale
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: k8s-pod-autoscale
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: k8s-pod-autoscale
+    spec:
+      serviceAccountName: k8s-pod-autoscale-sa
+      containers:
+        - name: autoscale-controller
+          image: ghcr.io/txltedxgod/k8s-pod-autoscale:latest
+          args:
+            - "--namespace=default"
+            - "--deployment=worker-queue-service"
+            - "--metric-url=http://queue-metrics.default.svc.cluster.local:8080/metrics"
+            - "--interval=10s"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
